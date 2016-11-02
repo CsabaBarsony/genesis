@@ -1,0 +1,5 @@
+.idea/
+/public/*.html
+public/js/*.js
+public/css/*.css
+node_modules
