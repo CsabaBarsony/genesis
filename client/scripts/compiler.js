@@ -2,13 +2,14 @@ var browserify = require('browserify');
 var fs         = require('fs-extra');
 var glob       = require('glob');
 var pug        = require('pug');
+var sass       = require('node-sass');
 
 var parsePath = require('./parse_path');
 var time      = require('./time');
 
-var compiler = {
+var tasks = {
     createPages: function() {
-        glob.sync('./src/pages/**/*.jsx').map(function(path) {
+        glob.sync('./client/pages/**/*.jsx').map(function(path) {
             var file = parsePath(path);
             var dest = './public/js/' + file.name + '.js';
 
@@ -25,7 +26,7 @@ var compiler = {
         });
     },
     createMarkups: function() {
-        glob.sync('./src/pages/**/*.pug').map(function(path) {
+        glob.sync('./client/pages/**/*.pug').map(function(path) {
             var file = parsePath(path);
             var dest = './public/' + file.name + '.html';
 
@@ -35,19 +36,34 @@ var compiler = {
                 writeReady(error, dest);
             });
         })
+    },
+    createStyles: function() {
+        glob.sync('./client/components/**/*.scss').map(function(path) {
+            var file = parsePath(path);
+            var style = sass.renderSync({ file: path });
+            var dest = './public/css/' + file.name + '.css';
+
+            fs.writeFile(dest, style.css, function(error) {
+                writeReady(error, dest);
+            })
+        });
     }
 };
 
-var compile = function() {
-
+var compiler = {
+    init: function() {
+        fs.removeSync('./public/*.html');
+        fs.removeSync('./public/js/*.js');
+        fs.removeSync('./public/css/*.css');
+        tasks.createPages();
+        tasks.createMarkups();
+        tasks.createStyles();
+    }
 };
-
-compiler.createPages();
-compiler.createMarkups();
 
 function writeReady(error, path) {
     if(error) console.error(time(new Date()), __filename, error);
     else console.log(time(new Date()) + ' write ready: ' + path);
 }
 
-module.exports = compile;
+module.exports = compiler;

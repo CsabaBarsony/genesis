@@ -5,9 +5,8 @@ global._ = require('lodash');
 
 jasmine.loadConfig({
     'spec_files': [
-        'scripts/**/*.test.js',
-        'server/**/*.test.js',
-        'src/**/*.test.js'
+        'client/**/*.test.js',
+        'server/**/*.test.js'
     ],
     'stopSpecOnExpectationFailure': false,
     'random': false
